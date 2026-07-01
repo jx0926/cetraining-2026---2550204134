@@ -1,0 +1,68 @@
+import string
+
+def count_words_in_file(file_path):
+    """
+    统计指定文本文件中每个单词出现的次数
+    
+    参数:
+    file_path (str): 文本文件的路径
+    
+    返回:
+    dict: 包含单词及其出现次数的字典，如果文件不存在则返回 None
+    """
+    word_counts = {}
+    
+    try:
+        # 使用 with open 确保文件会被正确关闭，encoding='utf-8' 避免中文乱码
+        with open(file_path, 'r', encoding='utf-8') as file:
+            translator = str.maketrans('', '', string.punctuation)
+            for line in file:
+                # 1. 去除首尾空白字符
+                line = line.strip()
+                if not line:
+                    continue # 跳过空行
+                
+                # 2. 转换为小写，确保统计时不区分大小写
+                line = line.lower()
+                
+                # 3. 去除标点符号
+                # string.punctuation 包含所有的英文标点符号，如 !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+                # maketrans 创建一个映射表，将所有标点符号映射为 None
+                clean_line = line.translate(translator)
+                
+                # 4. 分割单词（按空白字符分割）
+                words = clean_line.split()
+                
+                # 5. 统计词频
+                for word in words:
+                    if word in word_counts:
+                        word_counts[word] += 1
+                    else:
+                        word_counts[word] = 1
+                        
+        return word_counts
+
+    except FileNotFoundError:
+        print(f"错误：找不到文件 '{file_path}'")
+        return None
+    except Exception as e:
+        print(f"读取文件时发生错误：{e}")
+        return None
+
+# ================= 使用示例 =================
+if __name__ == "__main__":
+    # 1. 创建一个测试文件
+    test_file = "test_sample.txt"
+    with open(test_file, 'w', encoding='utf-8') as f:
+        f.write("Hello world! Hello Python.\n")
+        f.write("This is a test. Is this a test? Yes!\n")
+    
+    # 2. 调用函数统计词频
+    result = count_words_in_file(test_file)
+    
+    # 3. 打印结果
+    if result is not None:
+        print("单词出现次数统计：")
+        # 按照字母顺序排序输出，使结果更易读
+        for word in sorted(result.keys()):
+            print(f"'{word}': {result[word]}")
